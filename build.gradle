@@ -6,12 +6,14 @@ plugins {
 task engine(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'engine.ComputeEngine'
+    standardInput = System.in
 }
 
 // e.g.: gradle compute --args="localhost 1234"
 task compute(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'client.ComputePi'
+    standardInput = System.in
 }
 
 dependencies {

@@ -31,9 +31,12 @@
 
 package engine;
 
+import java.rmi.NoSuchObjectException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Scanner;
+
 import compute.Compute;
 import compute.Task;
 
@@ -48,20 +51,29 @@ public class ComputeEngine implements Compute {
     }
 
     public static void main(String[] args) {
+        Compute engine = new ComputeEngine();
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
         try {
             String name = "Compute";
-            Compute engine = new ComputeEngine();
+            engine = new ComputeEngine();
             Compute stub =
                 (Compute) UnicastRemoteObject.exportObject(engine, 0);
             Registry registry = LocateRegistry.createRegistry(1099);
             registry.rebind(name, stub);
             System.out.println("ComputeEngine bound");
+            (new Scanner(System.in)).next();
         } catch (Exception e) {
             System.err.println("ComputeEngine exception:");
             e.printStackTrace();
+        } finally {
+            try {
+                UnicastRemoteObject.unexportObject(engine, true);
+            } catch (NoSuchObjectException e) {
+                System.err.println("unable to unexport");
+                e.printStackTrace();
+            }
         }
     }
 }
