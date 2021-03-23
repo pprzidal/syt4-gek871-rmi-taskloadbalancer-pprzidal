@@ -41,6 +41,10 @@ public class ComputePi {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
+        if(args.length != 2) {
+            System.err.println(usage());
+            System.exit(1);
+        }
         try {
         	// Hier ist was ganz wichtiges
             String name = "Compute";
@@ -53,5 +57,9 @@ public class ComputePi {
             System.err.println("ComputePi exception:");
             e.printStackTrace();
         }
-    }    
+    }
+
+    public static String usage() {
+        return "You should provide two Arguments. \n1st would be the hostname / IP you want to connect to. \n2nd would be the number of decimal places to calculate.";
+    }
 }
