@@ -31,6 +31,7 @@
 
 package client;
 
+import java.math.BigInteger;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.math.BigDecimal;
@@ -50,8 +51,8 @@ public class ComputePi {
             String name = "Compute";
             Registry registry = LocateRegistry.getRegistry(args[0]);
             Compute comp = (Compute) registry.lookup(name);
-            Pi task = new Pi(Integer.parseInt(args[1]));
-            BigDecimal pi = comp.executeTask(task);
+            Fibonacci task = new Fibonacci(Integer.parseInt(args[1]));
+            BigInteger pi = comp.executeTask(task);
             System.out.println(pi);
         } catch (Exception e) {
             System.err.println("ComputePi exception:");

@@ -31,6 +31,8 @@
 
 package engine;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.rmi.NoSuchObjectException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -63,7 +65,9 @@ public class ComputeEngine implements Compute {
             Registry registry = LocateRegistry.createRegistry(1099);
             registry.rebind(name, stub);
             System.out.println("ComputeEngine bound");
-            (new Scanner(System.in)).next();
+            //(new Scanner(System.in)).next();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            while(!reader.readLine().equals("exit"));
         } catch (Exception e) {
             System.err.println("ComputeEngine exception:");
             e.printStackTrace();
