@@ -33,7 +33,9 @@ package engine;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.rmi.NoSuchObjectException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -45,7 +47,7 @@ import compute.Loadbalanceing;
 import compute.Task;
 
 public class ComputeEngine implements Compute {
-    private static Loadbalanceing lbEngine;
+    private static Loadbalanceing lbEngine = new LoadbalancerEngine();
 
     public ComputeEngine() {
         super();
@@ -59,22 +61,20 @@ public class ComputeEngine implements Compute {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
-        Compute engine = new ComputeEngine();
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            String name = "Compute";
-            engine = new ComputeEngine();
-            Compute stub =
-                (Compute) UnicastRemoteObject.exportObject(engine, 0);
+            Loadbalanceing stub = (Loadbalanceing) UnicastRemoteObject.exportObject(lbEngine, 0);
             Registry registry = LocateRegistry.createRegistry(1099);
-            registry.rebind(name, stub);
+            registry.rebind("Loadbalancer", stub);
             System.out.println("ComputeEngine bound");
             while(!reader.readLine().equals("exit"));
+            System.out.println("exiting");
         } catch (Exception e) {
             System.err.println("ComputeEngine exception:");
             e.printStackTrace();
         } finally {
             try {
-                UnicastRemoteObject.unexportObject(engine, true);
+                UnicastRemoteObject.unexportObject(lbEngine, false);
+                System.out.println("exported the BS");
             } catch (NoSuchObjectException e) {
                 System.err.println("unable to unexport");
                 e.printStackTrace();
@@ -83,17 +83,19 @@ public class ComputeEngine implements Compute {
     }
 }
 
-class LoadbalancerEngine implements Loadbalanceing, Compute {
+class LoadbalancerEngine implements Loadbalanceing, Compute, Serializable {
     private Queue<Compute> computingServers = new ArrayDeque<>();
 
     @Override
     public void register(Compute stub) {
         computingServers.add(stub);
+        System.out.println(Arrays.toString(computingServers.toArray()));
     }
 
     @Override
     public void unregister(Compute stub) {
         computingServers.remove(stub);
+        System.out.println(Arrays.toString(computingServers.toArray()));
     }
 
     @Override
