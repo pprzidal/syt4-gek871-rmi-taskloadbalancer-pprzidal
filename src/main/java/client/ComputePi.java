@@ -34,7 +34,6 @@ package client;
 import java.math.BigInteger;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.math.BigDecimal;
 import compute.Compute;
 
 public class ComputePi {

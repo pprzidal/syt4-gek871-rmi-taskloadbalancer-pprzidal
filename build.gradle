@@ -9,6 +9,12 @@ task engine(type: JavaExec) {
     standardInput = System.in
 }
 
+task server(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'engine.ComputeServer'
+    standardInput = System.in
+}
+
 // e.g.: gradle compute --args="localhost 1234"
 task compute(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath

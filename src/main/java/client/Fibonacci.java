@@ -26,7 +26,6 @@ public class Fibonacci implements Task<BigInteger>, Serializable {
                     out = prepre.add(pre);
                 }
                 return out;
-                // System.out.println(fibonacci(n));
             } else if (n >= 0) {
                 return out;
             } else {

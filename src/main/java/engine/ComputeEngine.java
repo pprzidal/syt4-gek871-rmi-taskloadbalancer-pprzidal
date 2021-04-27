@@ -34,30 +34,33 @@ package engine;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.rmi.NoSuchObjectException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Scanner;
+import java.util.*;
 
 import compute.Compute;
+import compute.Loadbalanceing;
 import compute.Task;
 
 public class ComputeEngine implements Compute {
+    private static Loadbalanceing lbEngine;
 
     public ComputeEngine() {
         super();
     }
 
-    public <T> T executeTask(Task<T> t) {
-        return t.execute();
+    public <T> T executeTask(Task<T> t) throws RemoteException {
+        return ((Compute)lbEngine).executeTask(t);
     }
 
     public static void main(String[] args) {
-        Compute engine = new ComputeEngine();
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
-        try {
+        Compute engine = new ComputeEngine();
+        try(BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             String name = "Compute";
             engine = new ComputeEngine();
             Compute stub =
@@ -65,8 +68,6 @@ public class ComputeEngine implements Compute {
             Registry registry = LocateRegistry.createRegistry(1099);
             registry.rebind(name, stub);
             System.out.println("ComputeEngine bound");
-            //(new Scanner(System.in)).next();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             while(!reader.readLine().equals("exit"));
         } catch (Exception e) {
             System.err.println("ComputeEngine exception:");
@@ -79,5 +80,27 @@ public class ComputeEngine implements Compute {
                 e.printStackTrace();
             }
         }
+    }
+}
+
+class LoadbalancerEngine implements Loadbalanceing, Compute {
+    private Queue<Compute> computingServers = new ArrayDeque<>();
+
+    @Override
+    public void register(Compute stub) {
+        computingServers.add(stub);
+    }
+
+    @Override
+    public void unregister(Compute stub) {
+        computingServers.remove(stub);
+    }
+
+    @Override
+    public <T> T executeTask(Task<T> t) throws RemoteException {
+        if(computingServers.size() == 0) return null; //TODO messy
+        Compute a = computingServers.poll();
+        computingServers.add(a);
+        return  a.executeTask(t);
     }
 }
