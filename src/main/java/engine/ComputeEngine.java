@@ -41,6 +41,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 
 import compute.Compute;
 import compute.Loadbalanceing;
@@ -48,10 +50,6 @@ import compute.Task;
 
 public class ComputeEngine implements Compute {
     private static Loadbalanceing lbEngine = new LoadbalancerEngine();
-
-    public ComputeEngine() {
-        super();
-    }
 
     public <T> T executeTask(Task<T> t) throws RemoteException {
         return ((Compute)lbEngine).executeTask(t);
@@ -61,10 +59,13 @@ public class ComputeEngine implements Compute {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
+        Compute c = new ComputeEngine();
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            Loadbalanceing stub = (Loadbalanceing) UnicastRemoteObject.exportObject(lbEngine, 0);
             Registry registry = LocateRegistry.createRegistry(1099);
-            registry.rebind("Loadbalancer", stub);
+            Compute stub1 = (Compute) UnicastRemoteObject.exportObject(c, 0);
+            Loadbalanceing stub = (Loadbalanceing) UnicastRemoteObject.exportObject(lbEngine, 0);
+            registry.rebind("Compute", c);
+            registry.rebind("Loadbalancer", lbEngine);
             System.out.println("ComputeEngine bound");
             while(!reader.readLine().equals("exit"));
             System.out.println("exiting");
@@ -74,6 +75,7 @@ public class ComputeEngine implements Compute {
         } finally {
             try {
                 UnicastRemoteObject.unexportObject(lbEngine, false);
+                UnicastRemoteObject.unexportObject(c, false);
                 System.out.println("exported the BS");
             } catch (NoSuchObjectException e) {
                 System.err.println("unable to unexport");
@@ -83,26 +85,30 @@ public class ComputeEngine implements Compute {
     }
 }
 
-class LoadbalancerEngine implements Loadbalanceing, Compute, Serializable {
+class LoadbalancerEngine implements Loadbalanceing, Compute {
     private Queue<Compute> computingServers = new ArrayDeque<>();
 
     @Override
-    public void register(Compute stub) {
+    public void register(Compute stub) throws RemoteException {
         computingServers.add(stub);
         System.out.println(Arrays.toString(computingServers.toArray()));
     }
 
     @Override
-    public void unregister(Compute stub) {
+    public void unregister(Compute stub) throws RemoteException {
         computingServers.remove(stub);
         System.out.println(Arrays.toString(computingServers.toArray()));
     }
 
     @Override
     public <T> T executeTask(Task<T> t) throws RemoteException {
-        if(computingServers.size() == 0) return null; //TODO messy
+        System.out.println(computingServers.size());
+        if(computingServers.size() == 0) {
+            System.out.println("is 0");
+            return null; //TODO messy
+        }
         Compute a = computingServers.poll();
         computingServers.add(a);
-        return  a.executeTask(t);
+        return a.executeTask(t);
     }
 }
