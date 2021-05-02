@@ -42,6 +42,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import compute.Compute;
@@ -49,7 +50,8 @@ import compute.Loadbalanceing;
 import compute.Task;
 
 public class ComputeEngine implements Compute {
-    private static Loadbalanceing lbEngine = new LoadbalancerEngine();
+    private static final Logger log = Logger.getLogger(ComputeEngine.class.getName());
+    private static final Loadbalanceing lbEngine = new LoadbalancerEngine();
 
     public <T> T executeTask(Task<T> t) throws RemoteException {
         return ((Compute)lbEngine).executeTask(t);
@@ -66,49 +68,19 @@ public class ComputeEngine implements Compute {
             Loadbalanceing stub = (Loadbalanceing) UnicastRemoteObject.exportObject(lbEngine, 0);
             registry.rebind("Compute", c);
             registry.rebind("Loadbalancer", lbEngine);
-            System.out.println("ComputeEngine bound");
+            log.info("ComputeEngine bound\nWrite \"exit\" to exit this App");
             while(!reader.readLine().equals("exit"));
-            System.out.println("exiting");
+            log.info("exiting");
         } catch (Exception e) {
-            System.err.println("ComputeEngine exception:");
-            e.printStackTrace();
+            log.log(Level.INFO, e.toString());
         } finally {
             try {
                 UnicastRemoteObject.unexportObject(lbEngine, false);
                 UnicastRemoteObject.unexportObject(c, false);
-                System.out.println("exported the BS");
             } catch (NoSuchObjectException e) {
                 System.err.println("unable to unexport");
                 e.printStackTrace();
             }
         }
-    }
-}
-
-class LoadbalancerEngine implements Loadbalanceing, Compute {
-    private Queue<Compute> computingServers = new ArrayDeque<>();
-
-    @Override
-    public void register(Compute stub) throws RemoteException {
-        computingServers.add(stub);
-        System.out.println(Arrays.toString(computingServers.toArray()));
-    }
-
-    @Override
-    public void unregister(Compute stub) throws RemoteException {
-        computingServers.remove(stub);
-        System.out.println(Arrays.toString(computingServers.toArray()));
-    }
-
-    @Override
-    public <T> T executeTask(Task<T> t) throws RemoteException {
-        System.out.println(computingServers.size());
-        if(computingServers.size() == 0) {
-            System.out.println("is 0");
-            return null; //TODO messy
-        }
-        Compute a = computingServers.poll();
-        computingServers.add(a);
-        return a.executeTask(t);
     }
 }

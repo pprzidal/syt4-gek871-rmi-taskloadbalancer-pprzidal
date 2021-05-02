@@ -1,11 +1,8 @@
 package engine;
 
-import compute.Compute;
-import compute.Loadbalanceing;
-import compute.Task;
+import compute.*;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
+import java.rmi.registry.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 
@@ -21,7 +18,7 @@ public class ComputeServer implements Compute {
             stub = (Compute) UnicastRemoteObject.exportObject(server, 0);
             loadbalancer = (Loadbalanceing) registry.lookup("Loadbalancer");
             loadbalancer.register(stub);
-            System.out.println("Waiting for exit");
+            System.out.println("Waiting for \"exit\"");
             while(!sc.nextLine().equals("exit"));
             System.out.println("exiting");
         } catch(Exception e) {
@@ -30,7 +27,6 @@ public class ComputeServer implements Compute {
             try {
                 loadbalancer.unregister(stub);
                 UnicastRemoteObject.unexportObject(server, false);
-                System.out.println("exported the BS");
             } catch (Exception e) {
                 System.err.println("Failed to unexportObject");
                 System.err.println(e.getLocalizedMessage());
@@ -40,7 +36,6 @@ public class ComputeServer implements Compute {
 
     @Override
     public <T> T executeTask(Task<T> t) throws RemoteException {
-        System.out.println("Hier");
         return t.execute();
     }
 }
