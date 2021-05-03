@@ -1,13 +1,10 @@
 package engine;
 
-import compute.Compute;
-import compute.Loadbalanceing;
-import compute.Task;
+import compute.*;
 import java.rmi.RemoteException;
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.*;
 
-public class LoadbalancerEngine implements Loadbalanceing, Compute {
+public class RoundRobinLB implements Loadbalanceing, Compute {
     private Queue<Compute> computingServers = new ArrayDeque<>();
 
     @Override
@@ -23,7 +20,7 @@ public class LoadbalancerEngine implements Loadbalanceing, Compute {
     @Override
     public <T> T executeTask(Task<T> t) throws RemoteException {
         if(computingServers.size() == 0) {
-            return null; //TODO messy
+            return null; //TODO vllt. ändern. Problem wenn es keine Server zum bearbeiten der Anfrage gibt. vllt. den Loadbalancer die Anfrage machen lassen
         }
         Compute a = computingServers.poll();
         computingServers.add(a);

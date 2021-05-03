@@ -51,7 +51,8 @@ import compute.Task;
 
 public class ComputeEngine implements Compute {
     private static final Logger log = Logger.getLogger(ComputeEngine.class.getName());
-    private static final Loadbalanceing lbEngine = new LoadbalancerEngine();
+    private static Loadbalanceing lbEngine;
+    private static final String usage = "You should provide an \"lclb\" for Least Connections Load Balanceing or \"rrlb\" for Round Robin Load Balanceing.";
 
     public <T> T executeTask(Task<T> t) throws RemoteException {
         return ((Compute)lbEngine).executeTask(t);
@@ -60,6 +61,16 @@ public class ComputeEngine implements Compute {
     public static void main(String[] args) {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
+        }
+        if(args.length != 1) {
+            System.err.println(usage);
+            System.exit(1);
+        }
+        if(args[0].equalsIgnoreCase("lclb")) lbEngine = new LeastConnectionsLB();
+        else if(args[0].equalsIgnoreCase("rrlb")) lbEngine = new RoundRobinLB();
+        else {
+            System.err.println(usage);
+            System.exit(1);
         }
         Compute c = new ComputeEngine();
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
@@ -75,8 +86,8 @@ public class ComputeEngine implements Compute {
             log.log(Level.INFO, e.toString());
         } finally {
             try {
-                UnicastRemoteObject.unexportObject(lbEngine, false);
-                UnicastRemoteObject.unexportObject(c, false);
+                UnicastRemoteObject.unexportObject(lbEngine, true);
+                UnicastRemoteObject.unexportObject(c, true);
             } catch (NoSuchObjectException e) {
                 System.err.println("unable to unexport");
                 e.printStackTrace();

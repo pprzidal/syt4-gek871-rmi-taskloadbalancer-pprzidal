@@ -26,7 +26,7 @@ public class ComputeServer implements Compute {
         } finally {
             try {
                 loadbalancer.unregister(stub);
-                UnicastRemoteObject.unexportObject(server, false);
+                UnicastRemoteObject.unexportObject(server, true);
             } catch (Exception e) {
                 System.err.println("Failed to unexportObject");
                 System.err.println(e.getLocalizedMessage());

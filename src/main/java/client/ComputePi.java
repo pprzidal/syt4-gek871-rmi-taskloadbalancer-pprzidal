@@ -31,18 +31,17 @@
 
 package client;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import compute.Compute;
+import compute.Task;
 
 public class ComputePi {
     public static void main(String args[]) {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
-        if(args.length != 2) {
+        if(args.length != 3) {
             System.err.println(usage());
             System.exit(1);
         }
@@ -51,9 +50,14 @@ public class ComputePi {
             String name = "Compute";
             Registry registry = LocateRegistry.getRegistry(args[0]);
             Compute comp = (Compute) registry.lookup(name);
-            Pi task = new Pi(Integer.parseInt(args[1]));
-            BigDecimal pi = comp.executeTask(task);
-            System.out.println(pi);
+            Task<?> task = null;
+            if(args[2].equalsIgnoreCase("pi")) task = new Pi(Integer.parseInt(args[1]));
+            else if(args[2].equalsIgnoreCase("fib")) task = new Fibonacci(Integer.parseInt(args[1]));
+            else {
+                System.err.println("3rd Argument must be either \"pi\" or \"fib\".");
+                System.exit(1);
+            }
+            System.out.println(comp.executeTask(task));
         } catch (Exception e) {
             System.err.println("ComputePi exception:");
             e.printStackTrace();
@@ -61,6 +65,6 @@ public class ComputePi {
     }
 
     public static String usage() {
-        return "You should provide two Arguments. \n1st would be the hostname / IP you want to connect to. \n2nd would be the number of decimal places to calculate.";
+        return "You should provide two Arguments. \n1st would be the hostname / IP you want to connect to. \n2nd would be the number of decimal places to calculate.\n3rd if \"pi\" or \"fib\"";
     }
 }
