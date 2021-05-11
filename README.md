@@ -8,7 +8,7 @@ Die Fragestellungen sind in [research](research.md) drinnen.
 
 <!-- TODO noch alles hinschreiben -->
 
-- [ ] Java RMI-Tutorial um "sauberes Schließen" erweitern
+### Java RMI-Tutorial um "sauberes Schließen" erweitern
 
 Wir haben also einen ComputeServer der nicht sauber geschlossen werden kann.
 Dieses Problem lässt sich lösen indem man den User eine Eingabe machen lässt und danach die Objekte unexported.
@@ -20,7 +20,7 @@ Wobei der Scanner von dem ``InputStream`` ``System.in`` liest und in einem try-w
 
 Im finally wird dann noch das objekt unexported.
 
-- [ ] Implementierung eines neuen Tasks (z.B. Fibonacci)
+### Implementierung eines neuen Tasks (z.B. Fibonacci)
 
 Hierzu muss einfach eine andere Klasse gemacht werden die den Task und Serializable implementiert.
 Und da es Task implementiert und nicht abstrakt ist muss es eben auch die execute Methode überschreiben.
@@ -46,7 +46,7 @@ else {
 System.out.println(comp.executeTask(task));
 ```
 
-- [ ] Implementierung eines Loadbalancer-Interfaces (register/unregister)
+### Implementierung eines Loadbalancer-Interfaces (register/unregister)
 
 Wir wollen also nicht nur einen Server haben dem alle Clients Anfragen schicken und damit grillen. Sondern dazwischen einen Loadbalancer haben der alle Client Anfragen annimmt und dann an einen ComputeServer weiterleitet und dieses Ergebnis dann an den Client weiterleitet.
 Für den Client sieht es also nun so aus als würde der Loadbalancer die Anfrage bearbeiten obwohl es ja eigentlich ein ComputeServer macht.
@@ -87,7 +87,7 @@ public <T> T executeTask(Task<T> t) throws RemoteException {
 }
 ```
 
-- [ ] Überlegungen zum Design und mögliche Implementierung weiterer Loadbalancing-Methoden (Weighted Distribution oder Least Connections)
+### Überlegungen zum Design und mögliche Implementierung weiterer Loadbalancing-Methoden (Weighted Distribution oder Least Connections)
 
 Ich habe den Least Connections Algorithmus gewählt weil er ein bisschen einfacher ist.
 
