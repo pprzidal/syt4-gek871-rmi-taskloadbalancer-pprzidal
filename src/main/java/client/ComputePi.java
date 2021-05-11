@@ -65,6 +65,6 @@ public class ComputePi {
     }
 
     public static String usage() {
-        return "You should provide two Arguments. \n1st would be the hostname / IP you want to connect to. \n2nd would be the number of decimal places to calculate.\n3rd if \"pi\" or \"fib\"";
+        return "You should provide three Arguments. \n1st would be the hostname / IP you want to connect to. \n2nd would be the number of decimal places to calculate.\n3rd if \"pi\" or \"fib\"";
     }
 }
