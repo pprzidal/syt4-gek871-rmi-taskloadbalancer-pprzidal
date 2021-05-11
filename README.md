@@ -6,11 +6,49 @@ Die Fragestellungen sind in [research](research.md) drinnen.
 
 ## Implementierung
 
-<!-- TODO noch alles hinschreiben -->
+Zuerst war noch alles zum laufen zu bringen. Wobei eine Datei namens ``.java.policy`` die im Home Directory vom aktuellen Benutzer (/home/phillip/ bzw. C:\Users\Phillip\) liegen muss.
+Der Inhalt sollte sein:
+
+```
+
+grant {
+    permission java.security.AllPermission "", "";
+};
+```
+
+Das muss gesetzt werden damit man Task von außen ausführen lassen kann. Weil das ja ein Sicherheitsrisiko sein kann.
 
 ### Java RMI-Tutorial um "sauberes Schließen" erweitern
 
-Wir haben also einen ComputeServer der nicht sauber geschlossen werden kann.
+Wir haben also einen ComputeServer der nicht sauber geschlossen werden kann. Wenn man sich den Start Code anschaut und ihn ausführt merkt man das er nach dem ComputeEngine Bound eigentlich nichts mehr ausgibt aber sich auch nicht beendet.
+Der Grund dafür kann recht einfach nachvollzogen werden indem man folgende Anweisung am Ende des try Blocks anfügt:
+
+```java
+System.out.println(Thread.getAllStackTraces().keySet());
+```
+
+Man wird da diese oder eine ähnliche Ausgabe bekommen. [2]
+
+```
+[Thread[RMI Reaper,5,system], Thread[main,5,main], Thread[Attach Listener,5,system], Thread[RMI TCP Accept-1099,5,system], Thread[RMI TCP Accept-0,5,system], Thread[Signal Dispatcher,9,system], Thread[Reference Handler,10,system], Thread[GC Daemon,2,system], Thread[Finalizer,8,system]]
+```
+
+Und man sieht das hier weitmehr als nur 1 Thread am arbeiten sind. Und ein Java Programm beendet sich erst dann wenn alle Threads zuende sind (im Regelfall wenn man jetzt nicht unbedingt System.exit(1); ausführt).
+Als erstes ist es recht wichtig das exportierte Objekt wieder unexporten. Also folgender finally Block wäre sinnvoll:
+
+```java
+finally {
+    try {
+        UnicastRemoteObject.unexportObject(engine, true);
+    } catch (NoSuchObjectException e) {
+        System.err.println("unable to unexport");
+        e.printStackTrace();
+    }
+}
+```
+
+Nun gibt es aber das Problem das dann das Programm nur sehr kurzfristig rennt.
+
 Dieses Problem lässt sich lösen indem man den User eine Eingabe machen lässt und danach die Objekte unexported.
 Es würde sich also folgende Zeile dafür anbieten:
 
@@ -89,8 +127,16 @@ public <T> T executeTask(Task<T> t) throws RemoteException {
 
 ### Überlegungen zum Design und mögliche Implementierung weiterer Loadbalancing-Methoden (Weighted Distribution oder Least Connections)
 
-Ich habe den Least Connections Algorithmus gewählt weil er ein bisschen einfacher ist.
+Ich habe den Least Connections Algorithmus gewählt weil er ein bisschen einfacher ist. Hierzu habe ich eine neue Klasse gemacht welche Compute und Loadbalanceing implementiert.
+Außerdem ist recht wichtig eine Map zu haben die pro Compute die Anzahl an gerade laufenden Verbindungen speichert.
+Wenn man dann einen Task bekommt muss zuerst der Server mit den wenigsten Connections gefunden werden dann seine Anzahl inkrementiert werden und dann der Task an ihn übermittelt werden und nach getaener Arbeit wieder den Value dekrementieren.
+
+Implementation siehe [hier](src/main/java/engine/LeastConnectionsLB.java).
 
 ## Quellen
 
 [1]     "github mborko code-examples"; [link](https://github.com/mborko/code-examples/blob/master/java/Fibonacci/src/main/java/fibonacci/Fibonacci.java); 11.05.2021
+
+[2]     "java get all running threads"; [link](https://stackoverflow.com/questions/1323408/get-a-list-of-all-threads-currently-running-in-java)
+
+[3]     "java get system load"; [link](https://stackoverflow.com/questions/10866861/in-c-or-java-is-there-a-way-to-get-the-cpu-usage); 11.05.2021

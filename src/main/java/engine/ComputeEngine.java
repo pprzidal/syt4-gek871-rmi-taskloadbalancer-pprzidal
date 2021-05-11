@@ -33,15 +33,11 @@ package engine;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.rmi.NoSuchObjectException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,6 +64,7 @@ public class ComputeEngine implements Compute {
         }
         if(args[0].equalsIgnoreCase("lclb")) lbEngine = new LeastConnectionsLB();
         else if(args[0].equalsIgnoreCase("rrlb")) lbEngine = new RoundRobinLB();
+        else if(args[0].equalsIgnoreCase("wdlb")) lbEngine = new WeightedDistribution();
         else {
             System.err.println(usage);
             System.exit(1);
