@@ -2,14 +2,13 @@ package engine;
 
 import com.sun.management.OperatingSystemMXBean;
 import compute.*;
-
 import java.lang.management.ManagementFactory;
 import java.rmi.RemoteException;
 import java.rmi.registry.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 
-public class ComputeServer implements ComputeHealth {
+public class ComputeServer implements ComputeHealth, Compute {
     private static final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(com.sun.management.OperatingSystemMXBean.class);
 
     public static void main(String[] args){

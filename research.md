@@ -10,7 +10,8 @@ RMI ist quasi die Java Implementierung von RPC.
 
 ### Was sind Stubs? Welche Aufgabe hat dabei das Proxy-Objekt?
 
-
+Ein Stub-Objekt ist ein (client-seitiger) Stellvertreter
+für das entfernte Objekt beim RMI-Server.
 
 ### Was wird in der Registry gespeichert?
 
@@ -23,7 +24,7 @@ Die Interfaces (``Compute`` und ``Loadbalanceing``) müssen von Remote erben und
 
 ### Was ist bei der Weitergabe von Objekten unabdingbar?
 
-
+Sie zu exportieren. Wenn sie nicht in der Registry sind kann sie der Client bzw. Aufrufer nicht sehen. Dann wären es nur lokale Objekte.
 
 ### Welche Methoden des `UnicastRemoteObject` kommen bei der Server-Implementierung zum Einsatz?
 
@@ -33,3 +34,10 @@ Die Interfaces (``Compute`` und ``Loadbalanceing``) müssen von Remote erben und
 
 Hierzu muss einfach nur eine CLI Eingabe ermöglicht werden. Also wenn der User z.b. ``exit`` eingibt.
 Dann müsste noch das exportierte Objekt unexportiert werden. Das wird am besten in einem finally Block, da dieser ja auch nach einer Exception oder nach vervollständigem try block ausgeführt wird.
+Mehr Details siehe Abschnitt ``Java RMI-Tutorial um "sauberes Schließen"`` erweitern" im [README.md](README.md).
+
+# Quellen
+
+* [1]     "java RMI Vortrag Borko"
+* [2]     "RMI uni marburg"; [online](https://www.informatik.uni-marburg.de/~mathes/download/k6.pdf)
+* [3]     ""
